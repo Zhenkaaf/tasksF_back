@@ -29,4 +29,29 @@ router.post("/newboard", async (req, res) => {
   }
 });
 
+
+router.post("/:boardId/newcolumn", async (req, res) => {
+  const { boardId } = req.params;
+  const { columnTitle } = req.body;
+  console.log('boardId------', boardId);
+  console.log('columnTitle', columnTitle);
+
+  try {
+    const board = await BoardSchema.findById(boardId);
+    if (!board) {
+      return res.status(404).json({ error: "Board not found" });
+    }
+    const newColumn = await board.columns.create({ columnTitle });
+    console.log('**********', newColumn);
+    board.columns.push(newColumn);
+    await board.save();
+    res.set("Access-Control-Allow-Origin", "*");
+    res.set("Access-Control-Allow-Methods", "POST");
+    res.status(200).json(newColumn);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 module.exports = router;
